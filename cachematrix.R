@@ -4,14 +4,18 @@
 
 ## A function that creates a matrix object with the intent of caching results
 makeCacheMatrix <- function(x = matrix()) {
-    m <- NULL
+    if(nrow(x) != ncol(x)) {
+        stop("You can only invert a square matrix!")
+    }
+
+    inverse <- NULL
     set <- function(y) {
         x <<- y
-        m <<- NULL
+        inverse <<- NULL
     }
     get <- function() x
-    setSolve <- function(solve) m <<- solve
-    getSolve <- function() m
+    setSolve <- function(solve) inverse <<- solve
+    getSolve <- function() inverse 
     list(set = set, get = get,
          setSolve = setSolve,
          getSolve = getSolve)
@@ -22,15 +26,15 @@ makeCacheMatrix <- function(x = matrix()) {
 ## inversion has been seen before it will return a cached result
 cacheSolve <- function(x, ...) {
     ## Return a matrix that is the inverse of 'x'
-    m <- x$getSolve()
-    if(!is.null(m)) {
+    inverse <- x$getSolve()
+    if(!is.null(inverse)) {
         message("getting cached data")
-        return(m)
+        return(inverse)
     }
     data <- x$get()
-    m <- solve(data, ...)
-    x$setSolve(m)
-    m
+    inverse <- solve(data, ...)
+    x$setSolve(inverse)
+    inverse
 }
 
 ## test function borrowed from Subramanian Kartik on the discussion boards
@@ -40,8 +44,10 @@ testFunc <- function()
     a<-matrix(data=1:4,nrow=2,ncol=2)
     print("Matrix to be inverted:")
     print(a)
+
     ## As cacheSolve() is expecting type makeCacheMatrix, use the constructor to create z from a
     z<-makeCacheMatrix(a)
+
     ## Now call cacheSolve() 5 times on z - 1st time should have no cached inverse, but subsequent calls should
     ## 5 times is arbitrary..2 should be enough
     print("1...Should not have cached data")
